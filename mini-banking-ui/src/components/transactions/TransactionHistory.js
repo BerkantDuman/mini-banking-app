@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { getTransactionHistory } from '../../services/ApiServices';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
+import { formatDate } from '../../common/commonFunctions';
 
 const TransactionStatus = Object.freeze({
     FAILED: "FAILED",
@@ -32,11 +33,6 @@ const useFetch = (accountId) => {
 
 export default function TransactionHistory({ onClose, accountId }) {
     const { transactions } = useFetch(accountId);
-
-    const formatDate = (dateString) => {
-        const options = { year: "numeric", month: "long", day: "numeric", hour: '2-digit', minute: '2-digit', second: '2-digit' }
-        return new Date(dateString).toLocaleDateString(undefined, options)
-    }
 
     return (
         <StyledModal

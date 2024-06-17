@@ -5,7 +5,8 @@ import {
     TablePagination,
     IconButton,
     Divider,
-    InputBase
+    InputBase,
+    Typography
 } from '@mui/material';
 import { styled } from '@mui/system';
 import React, { useEffect, useState } from 'react';
@@ -14,6 +15,8 @@ import CraeteAccount from './CraeteAccount';
 import { StyledContainer, StyledPaper } from '../../style/SharedStyle';
 import TransactionHistory from '../transactions/TransactionHistory';
 import SearchIcon from '@mui/icons-material/Search';
+import { formatDate } from '../../common/commonFunctions';
+import HistoryIcon from '@mui/icons-material/History';
 
 export const Account = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -61,6 +64,9 @@ export const Account = () => {
     return (
         <StyledContainer component="main" maxWidth="sm">
             <StyledPaper elevation={6}>
+                <Typography  sx={{color: '#fda184', marginBottom: '5%'}} variant="h4">
+                    ACCOUNTS
+                </Typography>
                 <Paper
                     component="form"
                     sx={{ display: 'flex', alignItems: 'center', width: '100%' }}
@@ -91,6 +97,7 @@ export const Account = () => {
                                     <TableCell>Name</TableCell>
                                     <TableCell>Number</TableCell>
                                     <TableCell>Balance</TableCell>
+                                    <TableCell>Created At</TableCell>
                                     <TableCell sx={{ textAlign: 'center' }}>History</TableCell>
                                 </TableRow>
                             </TableHead>
@@ -103,8 +110,12 @@ export const Account = () => {
                                         <TableCell>{account.name}</TableCell>
                                         <TableCell>{account.number}</TableCell>
                                         <TableCell>{account.balance.toLocaleString()}$</TableCell>
+                                        <TableCell>{`${formatDate(account.createdAt)}`}</TableCell>
                                         <TableCell sx={{ textAlign: 'center' }}>
-                                            <CreateButton color='secondary' onClick={() => handleTransactionHisyoryModal(true, account.id)} >Transaction History</CreateButton>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column', cursor: 'pointer' }} onClick={() => handleTransactionHisyoryModal(true, account.id)}>
+                                                <HistoryIcon sx={{ width: 30, height: 30 }} />
+                                                <Typography variant='caption' color="text.primary">Transaction History</Typography>
+                                            </Box>
                                             {isTransactionModalOpen && transactionHistoryId === account.id &&
                                                 <TransactionHistory key={account.id} accountId={account.id} onClose={handleTransactionHisyoryModal} />}
                                         </TableCell>

@@ -48,8 +48,6 @@ public class TransactionServiceImpl implements TransactionService {
             transactionFactory.createTransactionAndSave(fromAccount, toAccount, transferRequest.getAmount(), TransactionStatus.FAILED);
             throw new InsufficientFundsException("There aren't enough funds in the sender's account");
         }
-        transactionFactory.createTransactionAndSave(fromAccount, toAccount, transferRequest.getAmount(), TransactionStatus.FAILED);
-
 
         performTransfer(fromAccount, toAccount, transferRequest.getAmount());
 

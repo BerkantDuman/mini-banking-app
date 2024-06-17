@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { CustomTextField, StyledButton, StyledContainer, StyledPaper } from '../../style/SharedStyle';
-import { Box, InputAdornment } from '@mui/material';
+import { Box, InputAdornment, Typography } from '@mui/material';
 import { makeTransfer } from '../../services/ApiServices';
 import { AlertContext } from '../../context/AlertContext';
 
@@ -32,7 +32,7 @@ export const Transaction = () => {
         return errors;
     };
 
-    const handleSubmit = async (e)  => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const errors = validate(amount, fromAccountNumber, toAccountNumber);
         setErrors(errors);
@@ -52,6 +52,9 @@ export const Transaction = () => {
 
         <StyledContainer component="main" maxWidth="sm">
             <StyledPaper elevation={6}>
+            <Typography sx={{ color: '#fda184', marginBottom: '5%' }} variant="h4">
+                TRANSACTION
+            </Typography>
                 <Box component="form" sx={{ width: '100%' }} onSubmit={handleSubmit} autoComplete="off">
                     <Box marginBottom={2}>
                         <CustomTextField

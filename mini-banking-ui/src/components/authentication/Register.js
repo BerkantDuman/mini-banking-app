@@ -36,7 +36,7 @@ export const Register = () => {
     }
 
     return (
-        <StyledContainer component="main" maxWidth="sm">
+        <StyledContainer component="main" maxWidth="sm" sx={{height: '100vh'}}>
             <StyledPaper elevation={6}>
                 <Typography component="h1" variant="h4" color="text.primary">Register!</Typography>
                 <Box component="form" width="100%" mt={1} onSubmit={handleSubmit}>

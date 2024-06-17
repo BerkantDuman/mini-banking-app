@@ -14,7 +14,7 @@ export default function CraeteAccount({ onClose }) {
     const { setAlert } = useContext(AlertContext);
 
     const validateForm = () => {
-        return number.length > 0 && name.length > 0 && balance !== null;
+        return number.length > 0 && name.length > 0 && balance >= 0;
     }
 
     const create = async (event) => {

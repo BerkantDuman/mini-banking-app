@@ -33,9 +33,9 @@ export const Login = () => {
 
 
     return (
-        <StyledContainer component="main" maxWidth="sm">
+        <StyledContainer component="main" maxWidth="sm" sx={{height: '100vh'}}>
             <StyledPaper elevation={6}>
-                <Typography component="h1" variant="h4" color="text.primary">Welcome, please sign in!</Typography>
+                <Typography component="h1" variant="h4" color="text.primary">Welcome MINI BANKING</Typography>
                 {errorMsg && <Typography variant='body2' color="error">{errorMsg}</Typography>}
                 <Box component="form" width="100%" mt={1} onSubmit={handleSubmit}>
                     <CustomTextField
