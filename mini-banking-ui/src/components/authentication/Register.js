@@ -27,7 +27,6 @@ export const Register = () => {
     const handleSubmit = async (event) => {
         event.preventDefault()
         const res = await auth.register({ username: username, password: password, email: email })
-        console.log(res)
         if (res === 200) {
             setAlert({ open: true, message: 'Registeration has successfully completed', severity: 'success' });
             clearForm()

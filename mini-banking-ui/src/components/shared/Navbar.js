@@ -32,7 +32,11 @@ export default function Navbar() {
                 <Box display="flex">
                     <Button color="inherit" href='/account'>ACCOUNT</Button>
                     <Button color="inherit" href='/transaction'>TRANSACTION</Button>
-                    <AccountCircleRoundedIcon onClick={() => { auth.logOut() }} sx={{ width: 50, height: 50, cursor: 'pointer' }} />
+                    <Button color="inherit" onClick={() => { auth.logOut() }}>LogOut</Button>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} >
+                        <AccountCircleRoundedIcon sx={{ width: 50, height: 50 }} />
+                        <Typography variant="caption"> {auth.user.sub} </Typography>
+                    </Box>
                 </Box>
             </Toolbar>
         );
@@ -58,11 +62,17 @@ export default function Navbar() {
                     open={drawerOpen}
                     onClose={handleDrawerClose}
                 >
-                    <List sx={{ background: '#ab893dc7', height: '100vh', minWidth: 200 }}>
-                        <StyledListItem button  onClick={()=> {handleDrawerClose(); navigate('/account')}}>Account</StyledListItem>
-                        <StyledListItem button  onClick={()=> {handleDrawerClose(); navigate('/transaction')}}>Transaction</StyledListItem>
-                        <StyledListItem button  onClick={()=> {handleDrawerClose(); auth.logOut()}}>LOGOUT</StyledListItem>
-                    </List>
+                    <Box sx={{ background: '#ab893dc7', display: 'flex', flexDirection: 'column', height: '100vh', minWidth: 200 }}>
+                        <List sx={{ flexGrow: 1 }}>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} >
+                                <AccountCircleRoundedIcon sx={{ width: 50, height: 50, color: 'white' }} />
+                                <Typography variant="caption" color={'white'}> {auth.user.sub} </Typography>
+                            </Box>
+                            <StyledListItem button onClick={() => { handleDrawerClose(); navigate('/account') }}>Account</StyledListItem>
+                            <StyledListItem button onClick={() => { handleDrawerClose(); navigate('/transaction') }}>Transaction</StyledListItem>
+                        </List>
+                        <StyledListItem button sx={{paddingBlock: '10%'}} onClick={() => { handleDrawerClose(); auth.logOut() }} >LOGOUT</StyledListItem>
+                    </Box>
                 </Drawer>
 
                 <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -73,7 +83,7 @@ export default function Navbar() {
     };
 
     return (
-        <AppBar position="static" sx={{ background: '#ab893dc7' }}>
+        <AppBar position="static" sx={{ background: '#ab893dc7', height: 64 }}>
             {mobileView ? displayMobile() : displayDesktop()}
         </AppBar>
     );

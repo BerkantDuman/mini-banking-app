@@ -18,15 +18,15 @@ public class TransactionController {
     private TransactionService transactionService;
 
     @PostMapping("/transfer")
-    public ResponseEntity<Transaction> transferMoney(@RequestBody TransferRequest request){
+    public ResponseEntity<Transaction> transferMoney(@RequestBody TransferRequest request, Authentication authentication) {
         return
                 ResponseEntity.ok().body(
-                        transactionService.transferMoney(request)
+                        transactionService.transferMoney(request, authentication)
                 );
     }
 
     @GetMapping("/account/{accountId}")
-    public ResponseEntity<List<Transaction>> getTransactionHistory(@PathVariable UUID accountId, Authentication authentication){
-        return ResponseEntity.ok(transactionService.getAccountTransactionHistory(accountId, authentication));
+    public ResponseEntity<List<Transaction>> getTransactionHistory(@PathVariable UUID accountId, Authentication authentication) {
+        return ResponseEntity.ok(transactionService.fetchAccountTransactionHistoryForUser(accountId, authentication));
     }
 }

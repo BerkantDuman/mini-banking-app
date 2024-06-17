@@ -25,7 +25,6 @@ const AuthProvider = ({ children }) => {
         try {
             return axios.post("http://localhost:8080/api/users/login", data)
                 .then(response => {
-                    console.log("Response", response)
                     setToken(response.data.accessToken)
                     setUser(jwtDecode(response.data.accessToken))
                     localStorage.setItem("token", response.data.accessToken);

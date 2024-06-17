@@ -15,7 +15,6 @@ const useFetch = (accountId) => {
 
     const fetchTransactions = async () => {
         try {
-            console.log("Account ID ", accountId)
             const transactions = await getTransactionHistory(accountId);
             setAccounts(transactions)
         } catch (error) {
@@ -64,7 +63,7 @@ export default function TransactionHistory({ onClose, accountId }) {
                                         }
                                     </ListItemIcon>
                                     <ListItemText
-                                        primary={`Transaction ${transaction.status.toLowerCase()} from  Account ${transaction.from.number} to  Account ${transaction.to.number}`}
+                                        primary={`Transaction ${transaction.status.toLowerCase()} from  Account ${transaction.from.name} to  Account ${transaction.to.name}`}
                                         secondary={`${formatDate(transaction.transactionDate)}`}
                                         sx={{ marginRight: "30px" }} />
                                     <ListItemSecondaryAction>

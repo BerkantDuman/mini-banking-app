@@ -49,6 +49,7 @@ export const Account = () => {
 
     const handleAddAccountModal = (isOpen) => {
         setIsModalOpen(isOpen);
+        fetchAccounts(search)
     }
 
     const handleTransactionHisyoryModal = (isOpen, accountId) => {

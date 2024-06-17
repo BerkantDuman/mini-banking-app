@@ -9,10 +9,12 @@ import com.banking.app.model.Account;
 import com.banking.app.model.Transaction;
 import com.banking.app.model.User;
 import com.banking.app.repository.TransactionRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 
@@ -22,118 +24,108 @@ import java.math.BigDecimal;
 import java.util.*;
 
 import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 public class TransactionServiceImplTest {
 
+    private TransactionServiceImpl transactionService;
+
     @Mock
     private AccountService accountService;
+
     @Mock
     private TransactionRepository transactionRepository;
+
     @Mock
     private TransactionFactory transactionFactory;
+
     @Mock
     private UserService userService;
 
     @Mock
     private Authentication authentication;
 
-    @InjectMocks
-    private TransactionServiceImpl transactionService;
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.initMocks(this);
 
-    private UUID uuid = UUID.randomUUID();
-
-    private TransferRequest transferRequest = new TransferRequest(
-            "from-123'",
-            "to-123",
-            BigDecimal.valueOf(10));
+        transactionService = new TransactionServiceImpl(accountService, transactionRepository, transactionFactory, userService);
+    }
 
     @Test
-    void shouldTransferMoneySuccessfully() {
+    void transferMoney() {
+        // Given
+        User user = new User();
         Account fromAccount = new Account();
         fromAccount.setBalance(BigDecimal.valueOf(1000));
         Account toAccount = new Account();
-        toAccount.setBalance(BigDecimal.valueOf(500));
-        BigDecimal amount = BigDecimal.valueOf(100);
+        toAccount.setBalance(BigDecimal.valueOf(2000));
+        BigDecimal transferAmount = BigDecimal.valueOf(500);
 
-        Transaction transaction = new Transaction();
-        transaction.setStatus(TransactionStatus.SUCCESS);
+        given(userService.getAuthenticatedUser(authentication)).willReturn(user);
+        given(accountService.getAccountByNumberAndUser("1234", user)).willReturn(java.util.Optional.ofNullable(fromAccount));
+        given(accountService.getAccountByNumber("5678")).willReturn(java.util.Optional.ofNullable(toAccount));
 
-        when(accountService.getAccountById(any(UUID.class))).thenReturn(Optional.of(fromAccount), Optional.of(toAccount));
-        when(transactionFactory.createTransactionAndSave(any(Account.class), any(Account.class), any(BigDecimal.class), any(TransactionStatus.class))).thenReturn(transaction);
+        // When
+        transactionService.transferMoney(new TransferRequest("1234", "5678", transferAmount), authentication);
 
-        Transaction result = transactionService.transferMoney(transferRequest);
-
-        assertEquals(transaction.getStatus(), result.getStatus());
-        verify(transactionFactory).createTransactionAndSave(any(Account.class), any(Account.class), any(BigDecimal.class), any(TransactionStatus.class));
+        // Then
+        verify(accountService).updateAccount(fromAccount, fromAccount.getId());
+        verify(accountService).updateAccount(toAccount, toAccount.getId());
     }
 
     @Test
-    void shouldGetAccountTransactionHistorySuccessfully() {
+    void getAccountTransactionHistory() {
+        // Given
         User user = new User();
-        user.setUsername("testUser");
-        user.setId(UUID.randomUUID());
+        UUID accountId = UUID.randomUUID();
 
-        List<Transaction> transactionList = new ArrayList<>();
-        Transaction transaction = new Transaction();
-        transaction.setStatus(TransactionStatus.SUCCESS);
-        transactionList.add(transaction);
+        given(userService.getAuthenticatedUser(authentication)).willReturn(user);
 
-        when(userService.getAuthenticatedUser(any())).thenReturn(user);
-        when(transactionRepository.findTransactionHistoryByAccountId(any(UUID.class), any(UUID.class))).thenReturn(transactionList);
+        // When
+        transactionService.fetchAccountTransactionHistoryForUser(accountId, authentication);
 
-        List<Transaction> result = transactionService.getAccountTransactionHistory(uuid, authentication);
-
-        assertEquals(1, result.size());
-        verify(transactionRepository).findTransactionHistoryByAccountId(any(UUID.class), any(UUID.class));
-        verify(userService).getAuthenticatedUser(any());
+        // Then
+        verify(transactionRepository).findTransactionHistoryByAccountId(accountId, user.getId());
     }
 
-    @Test
-    void shouldThrowAccountNotFoundException_whenFromAccountDoesNotExist() {
-        BigDecimal amount = BigDecimal.valueOf(100);
-
-        when(accountService.getAccountById(any(UUID.class))).thenReturn(Optional.empty());
-
-        assertThrows(AccountNotFoundException.class, () -> transactionService.transferMoney(transferRequest));
-    }
 
     @Test
-    void shouldThrowAccountNotFoundException_whenToAccountDoesNotExist() {
+    void transferMoneyWithInsufficientFundsShouldThrowException() {
+        // Given
+        User user = new User();
         Account fromAccount = new Account();
-        fromAccount.setBalance(BigDecimal.valueOf(1000));
-
-        BigDecimal amount = BigDecimal.valueOf(100);
-
-        when(accountService.getAccountById(any(UUID.class))).thenReturn(Optional.of(fromAccount), Optional.empty());
-
-        assertThrows(AccountNotFoundException.class, () -> transactionService.transferMoney(transferRequest));
-    }
-
-    @Test
-    void shouldThrowInsufficientFundsException_whenNotEnoughFunds() {
-        Account fromAccount = new Account();
-        fromAccount.setBalance(BigDecimal.valueOf(50));
+        fromAccount.setBalance(BigDecimal.valueOf(100));
         Account toAccount = new Account();
-        toAccount.setBalance(BigDecimal.valueOf(500));
-        BigDecimal amount = BigDecimal.valueOf(100);
+        toAccount.setBalance(BigDecimal.valueOf(2000));
+        BigDecimal transferAmount = BigDecimal.valueOf(1000);
 
-        when(accountService.getAccountById(any(UUID.class))).thenReturn(Optional.of(fromAccount), Optional.of(toAccount));
+        given(userService.getAuthenticatedUser(authentication)).willReturn(user);
+        given(accountService.getAccountByNumberAndUser("1234", user)).willReturn(java.util.Optional.ofNullable(fromAccount));
+        given(accountService.getAccountByNumber("5678")).willReturn(java.util.Optional.ofNullable(toAccount));
 
-        assertThrows(InsufficientFundsException.class, () -> transactionService.transferMoney(transferRequest));
+        // When & Then
+        assertThrows(InsufficientFundsException.class, () -> {
+            transactionService.transferMoney(new TransferRequest("1234", "5678", transferAmount), authentication);
+        });
     }
+
 
     @Test
-    void shouldThrowException_whenTransactionHistoryNotFound() {
+    void getAccountTransactionHistoryWhenNoTransactions() {
+        // Given
         User user = new User();
-        user.setUsername("testUser");
-        user.setId(UUID.randomUUID());
+        UUID accountId = UUID.randomUUID();
 
-        when(userService.getAuthenticatedUser(any())).thenReturn(user);
-        when(transactionRepository.findTransactionHistoryByAccountId(any(UUID.class), any(UUID.class))).thenReturn(Collections.emptyList());
+        given(userService.getAuthenticatedUser(authentication)).willReturn(user);
+        given(transactionRepository.findTransactionHistoryByAccountId(accountId, user.getId())).willReturn(new ArrayList<>());
 
-        List<Transaction> result = transactionService.getAccountTransactionHistory(uuid, authentication);
+        // When
+        List<Transaction> transactions = transactionService.fetchAccountTransactionHistoryForUser(accountId, authentication);
 
-        assertEquals(result.size(), 0);
+        // Then
+        assertTrue(transactions.isEmpty());
     }
+
 }

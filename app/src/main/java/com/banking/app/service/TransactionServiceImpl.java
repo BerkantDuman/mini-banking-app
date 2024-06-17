@@ -31,11 +31,13 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional(noRollbackFor = InsufficientFundsException.class, isolation = Isolation.SERIALIZABLE)
-    public Transaction transferMoney(TransferRequest transferRequest) {
+    public Transaction transferMoney(TransferRequest transferRequest, Authentication authentication) {
 
-        Account fromAccount = accountService.getAccountByNumber(transferRequest.getFromAccountNumber())
+        User user = userService.getAuthenticatedUser(authentication);
+
+        Account fromAccount = accountService.getAccountByNumberAndUser(transferRequest.getFromAccountNumber(), user)
                 .orElseThrow(() ->
-                        new AccountNotFoundException("Sender account not found: " + transferRequest.getFromAccountNumber() ));
+                        new AccountNotFoundException("Sender account not found: " + transferRequest.getFromAccountNumber()));
 
         Account toAccount = accountService.getAccountByNumber(transferRequest.getToAccountNumber())
                 .orElseThrow(() ->
@@ -46,15 +48,19 @@ public class TransactionServiceImpl implements TransactionService {
             transactionFactory.createTransactionAndSave(fromAccount, toAccount, transferRequest.getAmount(), TransactionStatus.FAILED);
             throw new InsufficientFundsException("There aren't enough funds in the sender's account");
         }
+        transactionFactory.createTransactionAndSave(fromAccount, toAccount, transferRequest.getAmount(), TransactionStatus.FAILED);
 
 
         performTransfer(fromAccount, toAccount, transferRequest.getAmount());
 
-        return transactionFactory.createTransactionAndSave(fromAccount, toAccount, transferRequest.getAmount(), TransactionStatus.SUCCESS);
+        return transactionFactory.createTransactionAndSave(fromAccount,
+                toAccount,
+                transferRequest.getAmount(),
+                TransactionStatus.SUCCESS);
     }
 
     @Override
-    public List<Transaction> getAccountTransactionHistory(UUID accountId, Authentication authentication) {
+    public List<Transaction> fetchAccountTransactionHistoryForUser(UUID accountId, Authentication authentication) {
         User user = userService.getAuthenticatedUser(authentication);
         return this.transactionRepository.findTransactionHistoryByAccountId(accountId, user.getId());
     }

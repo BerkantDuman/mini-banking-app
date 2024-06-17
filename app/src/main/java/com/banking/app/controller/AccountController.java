@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,30 +27,26 @@ public class AccountController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<Page  <Account>> searchAccounts(@RequestBody List<Filter> accountFilters, Pageable pageable) {
-        return ResponseEntity.ok().body(this.accountService.getAccounts(accountFilters, pageable));
+    public ResponseEntity<Page<Account>> searchAccounts(@RequestBody List<Filter> accountFilters, Pageable pageable, Authentication authentication) {
+        return ResponseEntity.ok().body(this.accountService.getAccounts(accountFilters, authentication, pageable));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity updateAccount(@PathVariable UUID id,
-                                        @RequestBody Account account){
+                                        @RequestBody Account account) {
         return ResponseEntity.ok().body(this.accountService.updateAccount(account, id));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity getAccountDetails(Authentication authentication,
-                                            @PathVariable UUID id){
+                                            @PathVariable UUID id) {
         return ResponseEntity.ok().body(this.accountService.getAccountDetails(id, authentication));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity deleteAccount(@PathVariable String id) {
-        try {
-            this.accountService.deleteAccount(id);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            throw e;
-        }
+        this.accountService.deleteAccount(id);
+        return ResponseEntity.ok().build();
 
     }
 

@@ -60,7 +60,6 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     @Override
     public User createUser(AuthRegister authRegister) {
-        try {
             User user = User.builder()
                     .createdAt(LocalDateTime.now())
                     .email(authRegister.getEmail())
@@ -69,9 +68,6 @@ public class UserServiceImpl implements UserDetailsService, UserService {
                     .build();
 
             return userRepository.save(user);
-        }catch (Exception e){
-            throw  e;
-        }
     }
 
     @Override

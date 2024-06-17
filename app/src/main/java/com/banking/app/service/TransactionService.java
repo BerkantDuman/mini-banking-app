@@ -9,8 +9,8 @@ import java.util.UUID;
 
 public interface TransactionService {
 
-    Transaction transferMoney(TransferRequest transferRequest);
+    Transaction transferMoney(TransferRequest transferRequest, Authentication authentication);
 
-    List<Transaction> getAccountTransactionHistory(UUID accountId, Authentication authentication);
+    List<Transaction> fetchAccountTransactionHistoryForUser(UUID accountId, Authentication authentication);
 
 }

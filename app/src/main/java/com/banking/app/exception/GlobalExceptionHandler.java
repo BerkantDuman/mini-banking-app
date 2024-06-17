@@ -1,6 +1,8 @@
 package com.banking.app.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,20 +27,30 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({Exception.class})
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public ResponseEntity handleException(Exception ee) {
-        return ResponseEntity.badRequest().body(ee.getMessage());
+    public ResponseEntity handleException(Exception e) {
+        log.error(e.getMessage());
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+
+    @ExceptionHandler({ConstraintViolationException.class, DataIntegrityViolationException.class})
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    public ResponseEntity handleException(DataIntegrityViolationException e) {
+        log.error(e.getMessage());
+        return ResponseEntity.badRequest().body("The entity already exist");
     }
 
 
     @ExceptionHandler({AuthenticationCredentialsNotFoundException.class})
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
     public ResponseEntity handleAuthErrors(AuthenticationCredentialsNotFoundException e) {
+        log.error(e.getMessage());
         return ResponseEntity.badRequest().body(e.getMessage());
     }
 
     @ExceptionHandler({UsernameNotFoundException.class})
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
     public ResponseEntity handleAuthErrors(UsernameNotFoundException e) {
+        log.error(e.getMessage());
         return ResponseEntity.badRequest().body(e.getMessage());
     }
 
@@ -46,6 +58,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, List<String>>> handleValidationErrors(MethodArgumentNotValidException ex) {
         List<String> errors = ex.getBindingResult().getFieldErrors()
                 .stream().map(FieldError::getDefaultMessage).collect(Collectors.toList());
+        log.error(ex.getMessage());
         return new ResponseEntity<>(getErrorsMap(errors), new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 

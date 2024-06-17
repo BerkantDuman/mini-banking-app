@@ -2,6 +2,7 @@ package com.banking.app.service;
 
 import com.banking.app.dto.Filter;
 import com.banking.app.exception.AccountNotFoundException;
+import com.banking.app.exception.InsufficientFundsException;
 import com.banking.app.model.Account;
 import com.banking.app.model.User;
 import com.banking.app.repository.AccountRepository;
@@ -14,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,13 +32,10 @@ public class AccountServiceImpl implements AccountService {
     private UserService userService;
 
     @Override
+    @Transactional
     public Account createAccount(Account account) {
-        try {
-            account.setCreatedAt(LocalDateTime.now());
-            return this.accountRepository.save(account);
-        } catch (Exception e) {
-            throw e;
-        }
+        account.setCreatedAt(LocalDateTime.now());
+        return this.accountRepository.save(account);
     }
 
     @Override
@@ -45,56 +44,48 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Optional<Account> getAccountById(UUID accountId) {
-            return  this.accountRepository.findById(accountId);
+    public Optional<Account> getAccountByNumberAndUser(String accountNumber, User user) {
+        return this.accountRepository.findByNumberAndUserId(accountNumber, user.getId());
     }
 
     @Override
-    public Page<Account> getAccounts(List<Filter> accountFilters, Pageable pageable) {
-        return this.accountRepository.findAll(AccountSpecification.columnEqual(accountFilters), pageable);
+    public Optional<Account> getAccountById(UUID accountId) {
+        return this.accountRepository.findById(accountId);
+    }
+
+    @Override
+    public Page<Account> getAccounts(List<Filter> accountFilters, Authentication authentication, Pageable pageable) {
+        User user = userService.getAuthenticatedUser(authentication);
+        return this.accountRepository.findAll(AccountSpecification.columnEqual(accountFilters, user), pageable);
     }
 
     @Override
     @Transactional
     public Account updateAccount(Account account, UUID accountId) {
-        try {
 
-            Account previousAccount = accountRepository.findById(
-                    accountId).orElseThrow(() ->
-                    new AccountNotFoundException("Given account could not be found" + accountId));
+        Account previousAccount = accountRepository.findById(
+                accountId).orElseThrow(() ->
+                new AccountNotFoundException("Given account could not be found" + accountId));
 
-            previousAccount.setBalance(account.getBalance());
-            previousAccount.setNumber(account.getNumber());
-            previousAccount.setName(account.getName());
-            previousAccount.setUpdatedAt(LocalDateTime.now());
-            previousAccount.setUser(account.getUser());
+        previousAccount.setBalance(account.getBalance());
+        previousAccount.setNumber(account.getNumber());
+        previousAccount.setName(account.getName());
+        previousAccount.setUpdatedAt(LocalDateTime.now());
+        previousAccount.setUser(account.getUser());
 
-            return this.accountRepository.save(previousAccount);
-        } catch (Exception e) {
-            throw e;
-        }
+        return this.accountRepository.save(previousAccount);
     }
 
     @Override
+    @Transactional
     public void deleteAccount(String accountId) {
         this.accountRepository.deleteById(UUID.fromString(accountId));
     }
 
     @Override
-    public Account getAccountDetails(UUID accountId, Authentication authentication) throws AccountNotFoundException {
+    public Account getAccountDetails(UUID accountId, Authentication authentication) {
         User user = userService.getAuthenticatedUser(authentication);
         return this.accountRepository.findByIdAndUserId(accountId, user.getId()).orElseThrow(() ->
                 new AccountNotFoundException("Given account could not be found for the authenticated user"));
-    }
-
-    private String generateAccountNumber() {
-        Random random = new Random();
-        DecimalFormat df = new DecimalFormat("0000");
-
-        String part1 = df.format(random.nextInt(1_0000));
-        String part2 = df.format(random.nextInt(1_0000));
-        String part3 = df.format(random.nextInt(1_0000));
-
-        return part1 + "-" + part2 + "-" + part3;
     }
 }

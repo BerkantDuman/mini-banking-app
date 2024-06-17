@@ -1,4 +1,4 @@
-import { TextField, Paper, Box, Modal, styled, IconButton } from '@mui/material';
+import { TextField, Paper, Box, Modal, styled, IconButton, InputAdornment } from '@mui/material';
 import { useContext, useState } from 'react';
 import { CustomTextField, StyledButton } from '../../style/SharedStyle';
 import { createAccount } from '../../services/ApiServices';
@@ -17,9 +17,12 @@ export default function CraeteAccount({ onClose }) {
         return number.length > 0 && name.length > 0 && balance !== null;
     }
 
-    const create = async () => {
+    const create = async (event) => {
+        event.preventDefault();
         try {
             await createAccount({ name: name, number: number, balance: balance, user: { id: user.userId } })
+            setAlert({ open: true, message: "Successfully Created", severity: 'success' });
+            onClose(false)
         } catch (error) {
             setAlert({ open: true, message: error.response.data, severity: 'error' });
         }
@@ -34,7 +37,7 @@ export default function CraeteAccount({ onClose }) {
         >
             <ModalPaper>
                 <CloseButton onClick={() => onClose(false)}>X</CloseButton>
-                <Box component="form" width="100%" mt={1} onSubmit={() => { create() }}>
+                <Box component="form" width="100%" mt={1} onSubmit={create}>
                     <CustomTextField
                         variant="standard"
                         margin="normal"
@@ -68,6 +71,9 @@ export default function CraeteAccount({ onClose }) {
                         autoComplete="Balance"
                         type='number'
                         autoFocus
+                        InputProps={{
+                            startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                        }}
                     />
 
                     <StyledButton

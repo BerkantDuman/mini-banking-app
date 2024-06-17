@@ -14,6 +14,5 @@ public interface UserService {
     UserDetails loadUserByUsername(String username);
     User createUser(AuthRegister authRegister);
     AuthResponse login(AuthRequest authRequest, AuthenticationManager authenticationManager, JwtService jwtService);
-
     User getAuthenticatedUser(Authentication authentication);
 }

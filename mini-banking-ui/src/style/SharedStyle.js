@@ -3,7 +3,7 @@ import { styled } from '@mui/system';
 
 export const StyledContainer = styled('div')({
     display: 'flex',
-    height: '100vh', // This fills the screen vertically
+    height: 'calc(100vh - 64px)',
     alignItems: 'center',
     justifyContent: 'center',
     background: 'linear-gradient(120deg, #f6d365 0%, #fda085 100%)',

@@ -23,11 +23,9 @@ export const Login = () => {
         event.preventDefault()
         try {
             await auth.loginAction({ username: username, password: password });
-            console.log("my Token", localStorage.getItem('token'));
             navigate('/account');
         } catch (error) {
-            console.log("Error", error);
-            setErrorMsg("Invalid username or password: ");
+            setErrorMsg("Invalid username or password");
         }
 
     }

@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { CustomTextField, StyledButton, StyledContainer, StyledPaper } from '../../style/SharedStyle';
-import { Box } from '@mui/material';
+import { Box, InputAdornment } from '@mui/material';
 import { makeTransfer } from '../../services/ApiServices';
 import { AlertContext } from '../../context/AlertContext';
 
@@ -63,6 +63,10 @@ export const Transaction = () => {
                             onChange={({ target }) => setAmount(target.value)}
                             error={!!errors.amount}
                             helperText={errors.amount}
+                            InputProps={{
+                                startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                            }}
+
                         />
                     </Box>
                     <Box marginBottom={2}>
