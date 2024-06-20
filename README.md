@@ -26,7 +26,7 @@ First, clone the repo: https://github.com/BerkantDuman/mini-banking-app.git
 1. Navigate to the backend directory
 
     ``` bash
-    cd mini-banking-app-backend
+    cd app
 
 2. set the database credentials:
     ``` bash
@@ -48,7 +48,7 @@ First, clone the repo: https://github.com/BerkantDuman/mini-banking-app.git
 1. Navigate to the frontend directory
 
     ```bash
-    cd ../mini-banking-app-frontend
+    cd ../mini-banking-ui
 
 2. Install the necessary packages
     ```bash
